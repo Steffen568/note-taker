@@ -1,6 +1,7 @@
 {
   "dependencies": {
     "express": "^4.17.3",
-    "heroku": "^7.60.1"
+    "heroku": "^7.60.1",
+    "uniqid": "^5.4.0"
   }
 }
