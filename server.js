@@ -1,18 +1,19 @@
-// import xpress
+
 const express = require('express')
+const apiRoutes = require('./routes/apiRoutes')
+const htmlRoutes = require('./routes/htmlRoutes')
+
+
+const PORT = process.env.PORT || 3001
 const app = express()
 
-// create port
-const PORT = process.env.PORT || 4001
 
-// read incoming json data
 app.use(express.urlencoded({ extended: true }))
 app.use(express.json())
 app.use(express.static('public'))
+app.use('/api', apiRoutes)
+app.use('/', htmlRoutes)
 
-// create paths within server
-require('./routes/apiRoutes')(app)
-require('./routes/htmlRoutes')(app)
 
 
 app.listen(PORT, () => {

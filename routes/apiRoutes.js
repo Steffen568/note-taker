@@ -1,50 +1,52 @@
-// const res = require('express/lib/response')
-const fs = require('fs')
-
-// npm package sets uniq id
+const router = require('express').Router()
+const db = require('../db/db.json')
 const uniqid = require('uniqid')
+const fs = require('fs')
+const path = require('path')
 
-// importing express 
-module.exports = (app) => {
 
-    let noteData = require(__dirname + "/../db/db.json")
+router.get('/notes', (req, res) => {
+    let results = db
+    res.json(results)
+})
 
-    app.get('/api/notes', (req, res) => {
-        res.json(noteData)
+router.post('/notes', (req, res) => {
+    let note = req.body
+    note.id = uniqid()
+    let dbJoin = path.join(__dirname, '../db/db.json')
+
+    if (!note) {
+        res.send(400)
+        db = []
+        return
+    }
+    db.push(note)
+    fs.writeFile(dbJoin, JSON.stringify(db), (err) => {
+        if (err) {
+            console.log(err)
+        }
+        console.log('note saved!')
     })
+    return res.json(note)
+})
 
-    app.post('/api/notes', (req, res) => {
-        let newNote = req.body
-        newNote.id = uniqid()
+router.delete('/notes/:id', (req, res) => {
+    let params = req.params.id
+    let dbJoin = path.join(__dirname, '../db/db.json')
 
-        noteData.push(newNote)
-
-        const rawData = JSON.stringify(noteData)
-
-        fs.writeFile(__dirname + "/../db/db.json", rawData, (err) => {
-            if (err) throw err
-        })
-        res.end()
+    for(let i = 0; i < db.length; i++) {
+        if(db[i].id === params) {
+            db.splice(i, 1)
+            break;
+        }
+    }
+    fs.writeFile(dbJoin, JSON.stringify(db), (err) => {
+        if(err) {
+            console.log(err)
+        }
+        console.log('Note Deleted!')
     })
+    return res.json(db)
+})
 
-    app.delete('/api/notes/:id', (req, res) => {
-        const noteId = req.params.id
-        let filtered = noteData.filter(function (note) {
-            return note.id != noteId
-        })
-
-        newNoteData = JSON.stringify(filtered)
-        noteData = filtered
-
-        fs.writeFileSync(__dirname + "/../db/db.json", newNoteDatam, (err) => {
-            if (err) throw err
-        })
-
-        res.end()
-    })
-
-    
-
-}
-
-
+module.exports = router
